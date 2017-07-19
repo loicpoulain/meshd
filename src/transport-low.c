@@ -214,6 +214,23 @@ static void destroy_sar_buf(void *pbuf)
 	g_free(buf);
 }
 
+static gint compare_ptr(gconstpointer a, gconstpointer b, void *user_data)
+{
+	return a - b;
+}
+
+static struct transport_low *transport_low_create(void)
+{
+	struct transport_low *tl = g_new0(struct transport_low, 1);
+
+	tl->rx_t = g_tree_new_full(compare_ptr, NULL, NULL, destroy_sar_buf);
+	tl->rx_cache_t = g_tree_new_full(compare_ptr, NULL, NULL,
+					 destroy_sar_buf);
+	tl->tx_t = g_tree_new_full(compare_ptr, NULL, NULL, destroy_sar_buf);
+
+	return tl;
+}
+
 static struct network_msg *transport_alloc_nmsg(bool ctrl, size_t tpdusize)
 {
 	struct network_msg *nmsg = network_msg_alloc(NMSG_HDR_SZ(NULL) +
@@ -436,7 +453,7 @@ int transport_low_recv(struct network *net, struct network_msg *nmsg)
 	uint32_t seq;
 
 	if (!net->trans_priv)
-		net->trans_priv = g_new0(struct transport_low, 1);
+		net->trans_priv = transport_low_create();
 
 	/* TODO avoid this double link */
 	tl = net->trans_priv;
@@ -550,23 +567,6 @@ static void transport_transmission_work(work_t *work)
 	 */
 	trans_timeout = 1000 + 200 + 50 * TTL_DEFAULT;
 	schedule_delayed_work(&tbuf->sar_w, trans_timeout);
-}
-
-static gint compare_ptr(gconstpointer a, gconstpointer b, void *user_data)
-{
-	return a - b;
-}
-
-static struct transport_low *transport_low_create(void)
-{
-	struct transport_low *tl = g_new0(struct transport_low, 1);
-
-	tl->rx_t = g_tree_new_full(compare_ptr, NULL, NULL, destroy_sar_buf);
-	tl->rx_cache_t = g_tree_new_full(compare_ptr, NULL, NULL,
-					 destroy_sar_buf);
-	tl->tx_t = g_tree_new_full(compare_ptr, NULL, NULL, destroy_sar_buf);
-
-	return tl;
 }
 
 int transport_low_send(struct network *net, uint8_t *data, size_t dlen,

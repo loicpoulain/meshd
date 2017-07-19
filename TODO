@@ -13,6 +13,7 @@ Transport:
 - Control messages support
 
 Provisioning:
+- Add device DB to store and Peek assigned addr ranges
 - Add missing provisioning options (OOB IN/OUT)
 
 Crypto:

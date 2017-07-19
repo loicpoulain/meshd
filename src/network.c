@@ -26,6 +26,7 @@
 #include "transport.h"
 #include "node.h"
 #include "access.h"
+#include "access.h"
 
 #define MAX_CACHE_ENTRY 100
 
@@ -266,6 +267,8 @@ struct network *network_provision(uint8_t net_key[16], uint16_t key_index,
 
 	g_message("Network provisioned (NID = %02x; addr = %04x)",
 		  net->id[7] & 0x7f, net->addr);
+
+	node.state = STATE_PROVISIONED;
 
 	init_work(&net->relay_w, network_relay_routine);
 	net->relay_q = g_queue_new();

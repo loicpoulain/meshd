@@ -62,7 +62,6 @@ gboolean tmp_prov(gpointer d)
 		g_message("doing");
 		done = true;
 		network_provision_new();
-		element_create(0);
 	}
 
 	/* provision peer device */
@@ -96,6 +95,7 @@ int main(int argc, char *argv[])
 	/* tmp for dbg purpose */
 	sid1 = g_unix_signal_add(SIGUSR1, tmp_prov, mainloop);
 	sid2 = g_unix_signal_add(SIGUSR2, tmp_sendmsg, mainloop);
+	element_create(0);
 
 	crypto_init();
 	network_init();

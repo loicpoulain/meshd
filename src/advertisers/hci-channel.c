@@ -318,6 +318,5 @@ int hci_channel_init(void)
 {
 	/* TODO make it configurable */
 	/* TODO release function (hci_unref & queue destroy) */
-	hci_channel_register(1);
 	return hci_channel_register(0);
 }

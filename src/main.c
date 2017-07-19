@@ -27,6 +27,8 @@
 #include "network.h"
 #include "provision.h"
 #include "transport.h"
+#include "bearer.h"
+#include "access.h"
 
 GMainLoop *mainloop;
 struct node_st node;
@@ -40,17 +42,39 @@ gboolean signal_handler_interrupt(gpointer data)
 	return G_SOURCE_CONTINUE;
 }
 
-static void prov_cb(int result)
-{
-	char data[] = "hello world how are you doing world this is a long msg";
 
-	transport_up_send_access_msg(node.network_l->data, data, sizeof(data) - 4, 0x4242, 0x1234, 0);
-	//transport_up_send_access_msg(node.network_l->data, data, sizeof(data) - 4, 0x4242, 0x1235, 0);
+static void tmp_provion_cb(int result)
+{
+	if (result)
+		g_message("prov error");
+
+	g_message("prov success");
+}
+
+/* SIGUSR1 provision device UUID 00000000 with address 0x1234 .... */
+gboolean tmp_prov(gpointer d)
+{
+	/* provision peer device */
+	uint8_t uuid[16] = { };
+	provision_device(NULL, uuid, 0, 0x1234, tmp_provion_cb);
+
+	return true;
+}
+
+/* SIGUSR2 Send msg to 0x1234 */
+gboolean tmp_sendmsg(gpointer d)
+{
+	char data[] = "hello world this is a long message...";
+
+	transport_up_send_access_msg(node.network_l->data,
+				     data, sizeof(data) - 4, 0x4242, 0x1234, 0);
+
+	return true;
 }
 
 int main(int argc, char *argv[])
 {
-	guint sid;
+	guint sid0, sid1, sid2;
 
 	mainloop = g_main_loop_new(NULL, FALSE);
 	if (mainloop == NULL)
@@ -63,35 +87,27 @@ int main(int argc, char *argv[])
 	/* init radios */
 
 	/* Signal handlers */
-	//sid = g_unix_signal_add(SIGINT, signal_handler_interrupt, mainloop);
+	sid0 = g_unix_signal_add(SIGINT, signal_handler_interrupt, mainloop);
+	/* tmp for dbg purpose */
+	sid1 = g_unix_signal_add(SIGUSR1, tmp_prov, mainloop);
+	sid2 = g_unix_signal_add(SIGUSR2, tmp_sendmsg, mainloop);
 
-	hci_channel_init();
-	network_layer_init();
+	network_init();
 	provision_init();
+	bearer_adv_init();
 
-	{
-		//char data[] = "hello world how are you doing world this is a long msg";
-		//char data1[] = "hello world how are you doing world this is a long msg";
-		//char data2[] = "hello world how are you doing world this is a long msg";
-		//struct network *net = network_provision_new();
-		//transport_up_send_access_msg(net, data, sizeof(data) - 4, 0x4242, 0x4343, 0);
-		//transport_up_send_access_msg(net, data1, sizeof(data1) - 4, 0x4242, 0xFFFF, 0);
-		//transport_up_send_access_msg(net, data2, sizeof(data2) - 4, 0x4242, 0xC001, 0);
-	}
-
-	{
-		element_create(0);
-		struct network *net = network_provision_new();
-		uint8_t uuid[16] = { };
-		provision_device(NULL, uuid, 0, 0x1234, prov_cb);
-		//prov_cb(0);
-	}
+	/* tmp self provision network */
+	element_create(0);
+	network_provision_new();
 
 	g_main_loop_run(mainloop);
 
 	crypto_cleanup();
+	network_cleanup();
 
-	//g_source_remove(sid);
+	g_source_remove(sid0);
+	g_source_remove(sid1);
+	g_source_remove(sid2);
 
 	g_main_loop_unref(mainloop);
 

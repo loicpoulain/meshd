@@ -23,11 +23,13 @@
 int transport_low_recv(struct network *net, struct network_msg *nmsg);
 int transport_low_send(struct network *net, uint8_t *data, size_t dlen,
 		       uint16_t src, uint16_t dst, uint32_t seq);
+
 int transport_up_recv_access_msg(struct network *net, void *data, size_t dlen,
 				uint32_t seq, uint16_t src, uint16_t dst,
 				unsigned int aid);
-
 int transport_up_recv_ctrl_msg(uint8_t opcode, void *data, size_t len,
 			       uint16_t src, uint16_t dst);
+int transport_up_send_access_msg(struct network *net, void *data, size_t dlen,
+       				 uint16_t src, uint16_t dst, unsigned int aid);
 
 #endif

@@ -48,14 +48,6 @@ struct scan_result {
 	struct prov_interface *pif;
 };
 
-/* This is a very basic address mgmt */
-/* TODO: bette db with addr releasing, etc ... */
-static struct provision_db {
-	uint16_t min_addr;
-	uint16_t max_addr;
-	uint16_t last_assigned
-};
-
 int prov_register_interface(struct prov_interface *pif);
 int prov_unregister_interface(struct prov_interface *pif);
 int provision_recv_pkt(void *session_id, void *pkt, size_t plen);
@@ -66,6 +58,7 @@ void *provision_accept(struct prov_interface *pif);
 typedef void (*prov_scan_callack_t)(struct scan_result *res);
 typedef void (*prov_dev_callack_t)(int result);
 
+int provision_init(void);
 int provision_scan(prov_scan_callack_t callback, int duration);
 int provision_device(struct prov_interface *pif,
 		     uint8_t device_uuid[16],

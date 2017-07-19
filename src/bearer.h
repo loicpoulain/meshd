@@ -23,6 +23,9 @@
 
 #include "advertisers/advertiser.h"
 
+/* Init bearer adv layer */
+int bearer_adv_init(void);
+
 /* Register an advertiser capable device */
 int bearer_adv_register_advertiser(struct advertiser *advertiser);
 

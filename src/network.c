@@ -329,15 +329,14 @@ static void local_dequeue(work_t *work)
 		network_msg_unref(nmsg);
 	}
 }
-/* */
 
-int network_layer_init(void)
+int network_init(void)
 {
 	//network_intf_register(&local_intf);
 	return 0;
 }
 
-void network_layer_cleanup(void)
+void network_cleanup(void)
 {
 	g_slist_free_full(node.network_l, (GDestroyNotify)release_network);
 }

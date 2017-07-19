@@ -215,3 +215,8 @@ int bearer_adv_register_advertiser(struct advertiser *adv)
 
 	return 0;
 }
+
+int bearer_adv_init(void)
+{
+	return hci_channel_init();
+}

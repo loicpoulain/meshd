@@ -1,2 +1,2 @@
 # bluetooth-mesh
-Bluetooth mesh stack for Linux
+Bluetooth mesh stack POC for Linux

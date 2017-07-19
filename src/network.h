@@ -154,7 +154,8 @@ static inline struct network *network_by_index(int index)
 	return NULL;
 }
 
-void network_layer_cleanup(void);
+int network_init(void);
+void network_cleanup(void);
 int network_intf_register(struct network_intf *nif);
 void network_intf_unregister(struct network_intf *nif);
 int network_recv_msg(struct network_intf *nif, struct network_msg *nmsg);

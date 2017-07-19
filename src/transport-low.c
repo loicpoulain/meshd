@@ -232,7 +232,7 @@ static void transport_low_ack_work(work_t *work)
 
 	nmsg->src = cpu_to_be16(rbuf->dst);
 	nmsg->dst = cpu_to_be16(rbuf->src);
-	nmsg->ttl = 0xff; /* TODO */
+	nmsg->ttl = 0x42; /* TODO */
 
 	ack = (void *)nmsg->pdu_mic;
 	ack->seg = 0;
@@ -242,7 +242,8 @@ static void transport_low_ack_work(work_t *work)
 	ack->seqzero_m = rbuf->seqauth >> 6;
 	ack->blockack = cpu_to_be32(rbuf->blockack);
 
-	g_message("Send Ack %x [auth-%d]", rbuf->blockack, rbuf->seqauth);
+	g_message("Send Ack %x [auth-%lu]", rbuf->blockack,
+		  (unsigned long)rbuf->seqauth);
 
 	network_send_msg(rbuf->tl->net, nmsg);
 	network_msg_unref(nmsg);
@@ -305,7 +306,8 @@ static int transport_low_recv_access_segment(struct transport_low *tl,
 		init_work(&rbuf->sar_w, transport_low_ack_work);
 		init_work(&rbuf->timeout_w, transport_low_incomplete_timeout);
 		g_tree_insert(tl->rx_t, SARKEY(src, dst), rbuf);
-		g_message("Start recv [auth-%d]", rbuf->seqauth);
+		g_message("Start recv [auth-%lu]",
+			  (unsigned long)rbuf->seqauth);
 	}
 
 	/* segment already received ? */
@@ -333,7 +335,7 @@ static int transport_low_recv_access_segment(struct transport_low *tl,
 	if (addr_is_unicast(rbuf->dst))
 		transport_low_ack_work(&rbuf->sar_w);
 
-	g_message("Recv complete [auth-%d]", rbuf->seqauth);
+	g_message("Recv complete [auth-%lu]", (unsigned long)rbuf->seqauth);
 
 	/* push to transport up */
 	transport_up_recv_access_msg(rbuf->tl->net, rbuf->pdu, rbuf->plen,
@@ -416,7 +418,7 @@ static int transport_low_recv_ack(struct transport_low *tl,
 		}
 	}
 
-	g_message("Send complete %x", tbuf->seqauth);
+	g_message("Send complete %lu", (unsigned long)tbuf->seqauth);
 
 	/* Reassembly complete */
 	g_assert(g_tree_remove(tl->tx_t, SARKEY(dst, src)));
@@ -456,7 +458,6 @@ int transport_low_recv(struct network *net, struct network_msg *nmsg)
 		struct unsegmented_ctrl_msg *ucm = (void *)ltpdu;
 		int dlen = tpdulen - sizeof(*ucm);
 
-		g_message("recv ctrl");
 		if (ucm->opcode == CTRL_OP_ACK) /* Special case */
 			return transport_low_recv_ack(tl, (void *)ltpdu, src,
 						      dst);
@@ -515,7 +516,7 @@ static void transport_transmission_work(work_t *work)
 
 		nmsg->src = cpu_to_be16(tbuf->src);
 		nmsg->dst = cpu_to_be16(tbuf->dst);
-		nmsg->ttl = 0xff;
+		nmsg->ttl = 0x42; /* TODO */
 
 		/* sequence is unique */
 		nmsg->seq[0] = seq >> 16;
@@ -534,7 +535,7 @@ static void transport_transmission_work(work_t *work)
 
 		memcpy(sam->data, tbuf->pdu + (i * SAM_MTU), seglen);
 
-		g_message("Send %d/%d [seqauth %x]", i, segn, tbuf->seqauth);
+		g_message("Send %d/%d [seqauth %lu]", i, segn, (unsigned long)tbuf->seqauth);
 
 		network_send_msg(tbuf->tl->net, nmsg);
 

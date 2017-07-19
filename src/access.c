@@ -141,6 +141,5 @@ int access_recv_msg(void *data, size_t len, uint16_t src, uint16_t dst)
 
 int register_model(struct model *model, int instance)
 {
-	struct element *elem = element_by_index(instance);
 	return 0;
 }

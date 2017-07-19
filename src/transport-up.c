@@ -27,6 +27,7 @@
 #include "utils.h"
 #include "network.h"
 #include "crypto.h"
+#include "transport.h"
 
 static inline void generate_app_nonce(struct application_nonce *nonce,
 				      uint32_t seq, uint16_t src, uint16_t dst,
@@ -88,6 +89,7 @@ int transport_up_send_ctrl_msg(struct network *net, void *data, size_t dlen,
 			       uint16_t src, uint16_t dst)
 {
 	//return transport_low_send(net, data, dlen, src, dst, seqauth);
+	return 0;
 }
 
 int transport_up_recv_ctrl_msg(uint8_t opcode, void *data, size_t len,

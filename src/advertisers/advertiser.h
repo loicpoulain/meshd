@@ -37,4 +37,7 @@ struct advertiser {
 	void *priv;
 };
 
+/* TODO Flag this */
+int hci_channel_init(void);
+
 #endif

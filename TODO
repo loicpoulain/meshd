@@ -1,3 +1,7 @@
+MISC:
+- Autools, automake...
+- ADD log mgmt, g_log ?
+
 Advertisers:
 - dbus advertiser (using bluez interface)
 - serial hci interface

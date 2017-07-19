@@ -17,15 +17,15 @@ $ make
 Only User control via SIGUSR1/2:
 
 1. run meshd on device 1
-	$ sudo ./meshd
+    $ sudo ./meshd
 
 2. run meshd on device 2
-	$ sudo ./meshd
+    $ sudo ./meshd
 
 3. Provision device 2 from device 1
-	$ sudo killall -SIGUSR1 meshd
+    $ sudo killall -SIGUSR1 meshd
 
 4. Wait for provisioning complete
 
 5. Send a mesh message from device 2 to 1
-	$ sudo killall -SIGUSR2 meshd
+    $ sudo killall -SIGUSR2 meshd

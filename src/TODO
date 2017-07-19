@@ -1,0 +1,20 @@
+Advertisers:
+- dbus advertiser (using bluez interface)
+- serial hci interface
+
+Bearer:
+- GATT BEARER support
+
+Network:
+- Use Circular Buffer as network msg cache
+
+Transport:
+- Friendship support
+- Control messages support
+
+Provisioning:
+- Add missing provisioning options (OOB IN/OUT)
+
+Crypto:
+- libssl support
+- embedded crypto ?

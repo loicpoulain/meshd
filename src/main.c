@@ -53,16 +53,12 @@ static void tmp_provion_cb(int result)
 }
 
 /* SIGUSR1 provision device UUID 00000000 with address 0x1234 .... */
+static struct network *net;
 gboolean tmp_prov(gpointer d)
 {
-	static bool done = false;
-
 	/* tmp self provision network */
-	if (done == false) {
-		g_message("doing");
-		done = true;
-		network_provision_new();
-	}
+	if (!net)
+		net = network_provision_new();
 
 	/* provision peer device */
 	uint8_t uuid[16] = { };
@@ -75,9 +71,13 @@ gboolean tmp_prov(gpointer d)
 gboolean tmp_sendmsg(gpointer d)
 {
 	char data[] = "hello world this is a long message...";
+	char data2[] = "hello world this is a local message...";
+
+	if (!net)
+		g_message("No network");
 
 	transport_up_send_access_msg(node.network_l->data,
-				     data, sizeof(data) - 4, 0x4242, 0x1234, 0);
+				     data, sizeof(data) - 4, net->addr, 0x1234, 0);
 
 	return true;
 }

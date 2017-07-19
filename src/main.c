@@ -20,6 +20,7 @@
 
 #include <glib.h>
 #include <errno.h>
+#include <stdbool.h>
 
 #include "node.h"
 #include "utils.h"
@@ -54,6 +55,16 @@ static void tmp_provion_cb(int result)
 /* SIGUSR1 provision device UUID 00000000 with address 0x1234 .... */
 gboolean tmp_prov(gpointer d)
 {
+	static bool done = false;
+
+	/* tmp self provision network */
+	if (done == false) {
+		g_message("doing");
+		done = true;
+		network_provision_new();
+		element_create(0);
+	}
+
 	/* provision peer device */
 	uint8_t uuid[16] = { };
 	provision_device(NULL, uuid, 0, 0x1234, tmp_provion_cb);
@@ -74,17 +85,11 @@ gboolean tmp_sendmsg(gpointer d)
 
 int main(int argc, char *argv[])
 {
-	guint sid0, sid1, sid2;
+	guint sid0, sid1, sid2, sid3;
 
 	mainloop = g_main_loop_new(NULL, FALSE);
 	if (mainloop == NULL)
 		return -ENOMEM;
-
-	/* crypto */
-	crypto_init();
-
-	/* init client interface */
-	/* init radios */
 
 	/* Signal handlers */
 	sid0 = g_unix_signal_add(SIGINT, signal_handler_interrupt, mainloop);
@@ -92,13 +97,10 @@ int main(int argc, char *argv[])
 	sid1 = g_unix_signal_add(SIGUSR1, tmp_prov, mainloop);
 	sid2 = g_unix_signal_add(SIGUSR2, tmp_sendmsg, mainloop);
 
+	crypto_init();
 	network_init();
 	provision_init();
 	bearer_adv_init();
-
-	/* tmp self provision network */
-	element_create(0);
-	network_provision_new();
 
 	g_main_loop_run(mainloop);
 
@@ -108,6 +110,7 @@ int main(int argc, char *argv[])
 	g_source_remove(sid0);
 	g_source_remove(sid1);
 	g_source_remove(sid2);
+	g_source_remove(sid3);
 
 	g_main_loop_unref(mainloop);
 

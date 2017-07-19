@@ -252,7 +252,6 @@ struct network *network_provision(uint8_t net_key[16], uint16_t key_index,
 
 //	if (network_by_index(key_index))
 //		return NULL;
-
 	net = g_new0(struct network, 1);
 
 	net->index = key_index;
@@ -332,7 +331,7 @@ static void local_dequeue(work_t *work)
 
 int network_init(void)
 {
-	//network_intf_register(&local_intf);
+	network_intf_register(&local_intf);
 	return 0;
 }
 

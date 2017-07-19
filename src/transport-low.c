@@ -438,7 +438,9 @@ int transport_low_recv(struct network *net, struct network_msg *nmsg)
 	if (!net->trans_priv)
 		net->trans_priv = g_new0(struct transport_low, 1);
 
+	/* TODO avoid this double link */
 	tl = net->trans_priv;
+	tl->net = net;
 
 	seq = (uint32_t)nmsg->seq[0] << 16;
 	seq += (uint32_t)nmsg->seq[1] << 8;

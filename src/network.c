@@ -183,7 +183,9 @@ int network_recv_msg(struct network_intf *nif, struct network_msg *nmsg)
 		return err;
 
 	/* Forward to low transport layer */
-	transport_low_recv(net, nmsg);
+	/* TODO accept group/broadcast/virutal if subscribed */
+	if (element_by_address(be16_to_cpu(nmsg->dst)))
+		transport_low_recv(net, nmsg);
 
 	/* Relay ? */
 	if (nmsg->ttl < 2)

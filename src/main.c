@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 		return -ENOMEM;
 
 	/* Signal handlers */
-	sid0 = g_unix_signal_add(SIGINT, signal_handler_interrupt, mainloop);
+	//sid0 = g_unix_signal_add(SIGINT, signal_handler_interrupt, mainloop);
 	/* tmp for dbg purpose */
 	sid1 = g_unix_signal_add(SIGUSR1, tmp_prov, mainloop);
 	sid2 = g_unix_signal_add(SIGUSR2, tmp_sendmsg, mainloop);

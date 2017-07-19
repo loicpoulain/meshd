@@ -43,6 +43,7 @@ static inline void generate_app_nonce(struct application_nonce *nonce,
 	nonce->iv_index = cpu_to_be32(iv_index);
 }
 
+/* tmp static null key */
 static uint8_t akey[16] = {};
 
 int transport_up_recv_access_msg(struct network *net, void *data, size_t dlen,

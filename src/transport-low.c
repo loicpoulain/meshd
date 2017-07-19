@@ -231,12 +231,19 @@ static struct transport_low *transport_low_create(void)
 	return tl;
 }
 
-static struct network_msg *transport_alloc_nmsg(bool ctrl, size_t tpdusize)
+static struct network_msg *transport_alloc_nmsg(struct network *net, bool ctrl,
+						size_t tpdusize)
 {
 	struct network_msg *nmsg = network_msg_alloc(NMSG_HDR_SZ(NULL) +
 						     tpdusize + (ctrl ? 8 : 4));
+	uint32_t seq = network_peek_seq(net);
 
 	nmsg->ctl = ctrl ? 0x01 : 0x00;
+
+	/* sequence is unique */
+	nmsg->seq[0] = seq >> 16;
+	nmsg->seq[1] = seq >> 8;
+	nmsg->seq[2] = seq;
 
 	return nmsg;
 }
@@ -245,7 +252,8 @@ static void transport_low_ack_work(work_t *work)
 {
 	struct sar_buf *rbuf = container_of(work, struct sar_buf, sar_w);
 	struct segment_ack_msg *ack;
-	struct network_msg *nmsg = transport_alloc_nmsg(true, sizeof(*ack));
+	struct network_msg *nmsg = transport_alloc_nmsg(rbuf->tl->net, true,
+							sizeof(*ack));
 
 	nmsg->src = cpu_to_be16(rbuf->dst);
 	nmsg->dst = cpu_to_be16(rbuf->src);
@@ -525,22 +533,17 @@ static void transport_transmission_work(work_t *work)
 		struct segmented_access_msg *sam;
 		struct network_msg *nmsg;
 		size_t seglen = MIN(SAM_MTU, tbuf->plen - (i * SAM_MTU));
-		uint32_t seq = network_peek_seq(tbuf->tl->net);
 
 		if (test_bit(i, &tbuf->blockack))
 			continue;
 
-		nmsg = transport_alloc_nmsg(false, sizeof(*sam) + seglen);
+		nmsg = transport_alloc_nmsg(tbuf->tl->net, false,
+					    sizeof(*sam) + seglen);
 		sam = (void *)nmsg->pdu_mic;
 
 		nmsg->src = cpu_to_be16(tbuf->src);
 		nmsg->dst = cpu_to_be16(tbuf->dst);
 		nmsg->ttl = 0x42; /* TODO */
-
-		/* sequence is unique */
-		nmsg->seq[0] = seq >> 16;
-		nmsg->seq[1] = seq >> 8;
-		nmsg->seq[2] = seq;
 
 		sam->segn = segn;
 		sam->sego_l = i;

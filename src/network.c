@@ -30,6 +30,7 @@
 
 #define MAX_CACHE_ENTRY 100
 
+/* Network Interface list */
 static GSList *intf_list;
 
 static gint network_msg_compare(gconstpointer a, gconstpointer b)

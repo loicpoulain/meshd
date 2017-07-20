@@ -33,6 +33,11 @@ struct param_desc {
 	const char *name;
 	int type;
 };
+#define PARAM_BYTE ((int) 'y')
+#define PARAM_INT16 ((int) 'n')
+#define PARAM_UINT16 ((int) 'q')
+#define PARAM_INT32 ((int) 'i')
+#define PARAM_UINT32 ((int) 'u')
 
 /**
  * struct amsg_desc - access message parameter description
@@ -69,7 +74,7 @@ struct state {
 struct model {
 	uint32_t id;
 	const char *desc;
-	struct state *states;
+	const struct state **states;
 };
 
 /**
@@ -88,5 +93,6 @@ struct element *element_by_index(int index);
 int access_recv_msg(void *data, size_t len, uint16_t src,
 		    uint16_t dst);
 struct element *element_create(int index);
+int register_model(struct model *model, int instance);
 
 #endif

@@ -138,6 +138,9 @@ struct element *element_create(int index)
 static int element_recv_msg(struct element *elem, uint16_t src,
 			    uint8_t *data, size_t dlen)
 {
+	uint32_t opcode = access_msg_get_opcode(data);
+	GSList *l;
+
 	/* The opcode belongs to the addressed model’s element. */
 
 	/* The model is bound to the application or device key that was used to
@@ -184,5 +187,13 @@ int access_recv_msg(void *data, size_t len, uint16_t src, uint16_t dst)
 
 int register_model(struct model *model, int instance)
 {
+	struct element *elem = element_by_index(instance);
+
+	if (!elem)
+		return -EINVAL;
+
+	/* TODO check state/msgs/opcodes */
+	elem->model_l = g_slist_append(elem->model_l, model);
+
 	return 0;
 }

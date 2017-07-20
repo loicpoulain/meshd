@@ -71,7 +71,6 @@ gboolean tmp_prov(gpointer d)
 gboolean tmp_sendmsg(gpointer d)
 {
 	char data[] = "hello world this is a long message...";
-	char data2[] = "hello world this is a local message...";
 
 	if (!net)
 		g_message("No network");

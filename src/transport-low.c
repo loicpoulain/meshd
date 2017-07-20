@@ -182,6 +182,13 @@ struct segment_ack_msg {
 } __attribute__ ((packed));
 #define CTRL_OP_ACK 0x00
 
+/**
+* struct transport_low - transport low data associated to a network
+* @net:		associated network
+* @tx_t:	list(g_tree) of outgoing msgs (segmentation)
+* @rx_t:	list(g_tree) of incomming msg (reassembly)
+* @rx_cache_t:	store last reassembled incomming msgs
+*/
 struct transport_low {
 	struct network *net;
 	GTree *tx_t;
@@ -189,7 +196,23 @@ struct transport_low {
 	GTree *rx_cache_t;
 };
 
+/* Segmentation & Reassembly buffer for incoming and outgoing msgs */
+/**
+* struct sar_buf - Segmentation & Reassembly buffer
+* @tl:		Associated low transport layer data
+* @src:		source address of in/out-coming msg
+* @dst:		destination address of in/out-coming msg
+* @seqauth:	sequence authentication value
+* @blockack:	map of acked segment (by peer(tx) or local(rx) device)
+* @plen:	payload size
+* @pdu:		upper transport payload
+* @sar_w:	tx: retransmit routine work (segment transmission timer)
+*		rx: ack routine work (acknowledgment timer)
+* @timeout_w:	tx: transmission timeout work (stop retransmission)
+* 		rx: reassembly timeout work (incomplete timer)
+*/
 struct sar_buf {
+	struct transport_low *tl;
 	uint16_t src;
 	uint16_t dst;
 	uint64_t seqauth:56;
@@ -198,11 +221,12 @@ struct sar_buf {
 	uint8_t pdu[MAX_TRANSPORT_PDU];
 	work_t sar_w;
 	work_t timeout_w;
-	struct transport_low *tl;
 };
 
 #define TTL_DEFAULT 20
 
+/* SaR buffers are stored in a g_tree, only one ongoing transaction at a time
+   for a same src/dst */
 #define SARKEY(src, dst) GUINT_TO_POINTER(((uint32_t)(src) << 16) + (uint32_t)(dst))
 
 static void destroy_sar_buf(void *pbuf)
@@ -248,6 +272,10 @@ static struct network_msg *transport_alloc_nmsg(struct network *net, bool ctrl,
 	return nmsg;
 }
 
+/* When the acknowledgment timer expires, the lower transport layer shall send a
+ * Segment Acknowledgment message with the BlockAck field set to the block
+ * acknowledgment value for the sequence authentication value.
+ */
 static void transport_low_ack_work(work_t *work)
 {
 	struct sar_buf *rbuf = container_of(work, struct sar_buf, sar_w);
@@ -274,15 +302,25 @@ static void transport_low_ack_work(work_t *work)
 	network_msg_unref(nmsg);
 }
 
+
+/* When the incomplete timer expires, the lower transport layer shall consider
+ * that the message being received has failed and cancel the acknowledgment
+ * timer.
+ */
 static void transport_low_incomplete_timeout(work_t *work)
 {
 	struct sar_buf *rbuf = container_of(work, struct sar_buf, timeout_w);
 	struct transport_low *tl = rbuf->tl;
 
-
 	g_assert(g_tree_remove(tl->rx_t, SARKEY(rbuf->src, rbuf->dst)));
+
+	/* TODO: move to cache and ignore futher segments */
 }
 
+/* The SeqAuth value can be derived from the IV Index, SeqZero, and SEQ in any
+ * of the segments, by determining the largest SeqAuth value for which SeqZero
+ * is between SEQ - 8191 and SEQ inclusive and using the same IV Index
+ */
 static inline uint64_t seqauth_gen(uint32_t seq, uint16_t seqzero13,
 				   uint32_t iv_index)
 {
@@ -321,8 +359,10 @@ static int transport_low_recv_access_segment(struct transport_low *tl,
 		return 0;
 	}
 
+	/* if the Segmented message has not been received yet, then the
+	   receiving device shall allocate sufficient memory */
 	rbuf = g_tree_lookup(tl->rx_t, SARKEY(src, dst));
-	if (rbuf == NULL) { /* create reassembly buffer and its timers */
+	if (rbuf == NULL) {
 		rbuf = g_new0(struct sar_buf, 1);
 		rbuf->tl = tl;
 		rbuf->src = src;
@@ -510,6 +550,7 @@ int transport_low_recv(struct network *net, struct network_msg *nmsg)
 	return 0;
 }
 
+/* Restransmission expiration */
 static void transport_transmission_timeout(work_t *work)
 {
 	struct sar_buf *tbuf = container_of(work, struct sar_buf, timeout_w);
@@ -520,6 +561,10 @@ static void transport_transmission_timeout(work_t *work)
 	g_assert(g_tree_remove(tl->tx_t, SARKEY(tbuf->src, tbuf->dst)));
 }
 
+/* If the segment transmission timer expires and no valid acknowledgment for the
+ * the lower transport layer shall retransmit all unacknowledged Lower Transport
+ * PDUs.
+ */
 static void transport_transmission_work(work_t *work)
 {
 	struct sar_buf *tbuf = container_of(work, struct sar_buf, sar_w);
@@ -557,7 +602,8 @@ static void transport_transmission_work(work_t *work)
 
 		memcpy(sam->data, tbuf->pdu + (i * SAM_MTU), seglen);
 
-		g_message("Send %d/%d [seqauth %lu]", i, segn, (unsigned long)tbuf->seqauth);
+		g_message("Send %d/%d [seqauth %lu]", i, segn,
+			  (unsigned long)tbuf->seqauth);
 
 		network_send_msg(tbuf->tl->net, nmsg);
 
@@ -605,7 +651,7 @@ int transport_low_send(struct network *net, uint8_t *data, size_t dlen,
 	schedule_work(&tbuf->sar_w);
 
 	if (addr_is_unicast(tbuf->dst)) {
-		schedule_delayed_work(&tbuf->timeout_w, 60000);
+		schedule_delayed_work(&tbuf->timeout_w, 30000);
 	} else {
 		/* Each Lower Transport PDU for an Upper Transport PDU shall be
 		 * transmitted at least two times, give some time to send

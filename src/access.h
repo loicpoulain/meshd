@@ -22,18 +22,62 @@
 #define __ACCESS_H
 
 #include <stdint.h>
+#include <glib.h>
 
-/*struct state {
+/**
+ * struct param_desc - access message parameter description
+ * @name:	paramater name
+ * @type:	parameter type
+ */
+struct param_desc {
+	const char *name;
+	int type;
+};
+
+/**
+ * struct amsg_desc - access message parameter description
+ * @desc:	human readable name
+ * @opcode:	access msg opcode
+ * @response:	expected response in case of acknowledged msg (optional)
+ * @params:	list of parameter description if any (optional)
+ */
+struct amsg_desc {
+	const char *desc;
+	uint32_t opcode;
+	const struct amsg_desc *response;
+	const struct param_desc *params;
+};
+
+/**
+ * struct state - mesh state exposed from element (server)
+ * desc:	human readable state name
+ * @rx:		array of supported rx access msgs
+ * @tx:		array of supported tx access msgs
+ */
+struct state {
 	const char *desc;
 	const struct amsg_desc **rx;
 	const struct amsg_desc **tx;
-};*/
+};
 
+/**
+ * struct model - mesh model
+ * id:		Mesh Model ID (SIG or Vendor)
+ * desc:	human readable model name
+ * states:	exposed states in case of server model
+ */
 struct model {
 	uint32_t id;
 	const char *desc;
+	struct state *states;
 };
 
+/**
+ * struct element - element
+ * index:	element index (0 is the primary element)
+ * subscribe_l:	list of subscribed addr
+ * model_l:	exposed states in case of server model
+ */
 struct element {
 	uint8_t index;
 	GSList *subscribe_l;

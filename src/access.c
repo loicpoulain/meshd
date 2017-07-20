@@ -94,6 +94,11 @@ struct element *element_create(int index)
 static int element_recv_msg(struct element *elem, uint16_t src,
 			    uint8_t *data, size_t dlen)
 {
+	/* The opcode belongs to the addressed model’s element. */
+
+	/* The model is bound to the application or device key that was used to
+	 * secure the transportation of the message
+	 */
 	g_message("Element recv");
 	return 0;
 }
@@ -129,12 +134,6 @@ int access_recv_msg(void *data, size_t len, uint16_t src, uint16_t dst)
 			}
 		}
 	}
-
-	/* The opcode belongs to the addressed model’s element. */
-
-	/* The model is bound to the application or device key that was used to
-	 * secure the transportation of the message
-	 */
 
 	return err;
 }

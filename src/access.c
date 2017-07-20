@@ -28,6 +28,50 @@
 #include "utils.h"
 #include "network.h"
 
+static inline uint32_t access_msg_get_opcode(uint8_t *access_msg)
+{
+	uint32_t opcode = 0;
+
+	/* An operation code (opcode) is an array of octets comprising 1, 2,
+	 * or 3 octets. The first octet of the opcode determines the number of
+	 * octets that are part of the opcode.
+	 */
+	switch ((uint8_t)access_msg[0] & 0xC0) {
+	case 0xC0: /* 3-octet opcode */
+		opcode = access_msg[0] << 16;
+		opcode += access_msg[1] << 8;
+		opcode += access_msg[2];
+		break;
+	case 0x80: /* 2-octet opcode */
+		opcode = access_msg[0] << 8;
+		opcode += access_msg[1];
+		break;
+	default: /* 1-octet opcode */
+		opcode = access_msg[0];
+	}
+
+	return opcode;
+}
+
+static inline int access_msg_set_opcode(uint8_t *access_msg, uint32_t opcode)
+{
+	if (opcode & 0x00FF0000) {
+		access_msg[0] = opcode >> 16;
+		access_msg[1] = opcode >> 8;
+		access_msg[2] = opcode;
+		return 3;
+	} else if (opcode & 0x0000FF00) {
+		access_msg[0] = opcode >> 8;
+		access_msg[1] = opcode;
+		return 2;
+	} else {
+		access_msg[0] = opcode;
+		return 1;
+	}
+
+	return 0;
+}
+
 static inline bool element_is_subscribing(struct element *elem,
 					  uint16_t addr)
 {

@@ -20,6 +20,13 @@ meshd-objs = \
 	src/advertisers/hci-channel.o \
 	src/crypto-$(CONF_CRYPTO).o
 
+# Models
+meshd-objs += \
+	src/models/configuration-server.o \
+	src/models/configuration-client.o \
+	src/models/health-server.o \
+	src/models/health-client.o
+
 bluez-objs = \
 	src/external/bluez/io-glib.o \
 	src/external/bluez/hci.o \

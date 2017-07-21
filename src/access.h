@@ -39,6 +39,11 @@ struct param_desc {
 #define PARAM_INT32 ((int) 'i')
 #define PARAM_UINT32 ((int) 'u')
 
+struct amsg_desc;
+
+typedef int (*amsg_onrecv_cb)(const struct amsg_desc *desc, uint8_t *params);
+typedef int (*amsg_onsend_cb)(const struct amsg_desc *desc, uint8_t *params);
+
 /**
  * struct amsg_desc - access message parameter description
  * @desc:	human readable name
@@ -52,6 +57,8 @@ struct amsg_desc {
 	uint32_t opcode;
 	const struct amsg_desc *response;
 	const struct param_desc *params;
+	amsg_onrecv_cb onrecv;
+	amsg_onsend_cb onsend;
 };
 
 /**

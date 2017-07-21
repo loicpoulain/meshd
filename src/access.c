@@ -148,12 +148,12 @@ static int element_recv_msg(struct element *elem, uint16_t src,
 		int i = 0;
 
 		/* for each state */
-		while (state = model->states[i++]) {
+		while ((state = model->states[i++])) {
 			const struct amsg_desc *desc;
 			int j = 0;
 
 			/* for each supported rx message */
-			while (desc = state->rx[j++]) {
+			while ((desc = state->rx[j++])) {
 				if (desc->opcode == opcode) {
 					g_message("recv %s", desc->desc);
 					return 0;

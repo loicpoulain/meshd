@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
 	network_init();
 	provision_init();
 	bearer_adv_init();
-
+	configuration_server_model_init();
 	g_main_loop_run(mainloop);
 
 	crypto_cleanup();

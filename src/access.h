@@ -45,6 +45,7 @@ struct param_desc {
  * @opcode:	access msg opcode
  * @response:	expected response in case of acknowledged msg (optional)
  * @params:	list of parameter description if any (optional)
+ * @onrecv:	callback on access msg reception
  */
 struct amsg_desc {
 	const char *desc;

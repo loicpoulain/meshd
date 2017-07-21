@@ -143,12 +143,23 @@ static int element_recv_msg(struct element *elem, uint16_t src,
 
 	/* The opcode belongs to the addressed model’s element. */
 	for (m = elem->serv_model_l; m != NULL; m = m->next) {
-		//struct model *model = m->data;
+		const struct server_model *model = m->data;
+		const struct state *state;
+		int i = 0;
 
-		/* model bound to app/dev key used to secure transport msg ? */
-		/* TODO */
+		/* for each state */
+		while (state = model->states[i++]) {
+			const struct amsg_desc *desc;
+			int j = 0;
 
-		//for (s = model->states[]; )
+			/* for each supported rx message */
+			while (desc = state->rx[j++]) {
+				if (desc->opcode == opcode) {
+					g_message("recv %s", desc->desc);
+					return 0;
+				}
+			}
+		}
 	}
 
 	/* The model is bound to the application or device key that was used to
@@ -202,6 +213,8 @@ int register_server_model(struct server_model *model, int instance)
 
 	/* TODO check state/msgs/opcodes */
 	elem->serv_model_l = g_slist_append(elem->serv_model_l, model);
+
+	g_message("Model [%s | 0x%08x] registered", model->desc, model->id);
 
 	return 0;
 }

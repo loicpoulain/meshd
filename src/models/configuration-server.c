@@ -54,7 +54,7 @@ static const struct state default_ttl_state = {
 	.tx = (const struct amsg_desc*[]) { &config_beacon_status, NULL },
 };
 
-static struct model configuration_server_model = {
+static struct server_model configuration_server_model = {
 	.id = 0x0000,
 	.desc = "Configuation server",
 	.states = (const struct state*[]) { &secure_network_beacon_state,
@@ -63,5 +63,5 @@ static struct model configuration_server_model = {
 
 int configuration_server_model_init(void)
 {
-	return register_model(&configuration_server_model, 0);
+	return register_server_model(&configuration_server_model, 0);
 }

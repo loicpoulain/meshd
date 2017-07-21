@@ -139,9 +139,17 @@ static int element_recv_msg(struct element *elem, uint16_t src,
 			    uint8_t *data, size_t dlen)
 {
 	uint32_t opcode = access_msg_get_opcode(data);
-	GSList *l;
+	GSList *m;
 
 	/* The opcode belongs to the addressed model’s element. */
+	for (m = elem->serv_model_l; m != NULL; m = m->next) {
+		//struct model *model = m->data;
+
+		/* model bound to app/dev key used to secure transport msg ? */
+		/* TODO */
+
+		//for (s = model->states[]; )
+	}
 
 	/* The model is bound to the application or device key that was used to
 	 * secure the transportation of the message
@@ -185,7 +193,7 @@ int access_recv_msg(void *data, size_t len, uint16_t src, uint16_t dst)
 	return err;
 }
 
-int register_model(struct model *model, int instance)
+int register_server_model(struct server_model *model, int instance)
 {
 	struct element *elem = element_by_index(instance);
 
@@ -193,7 +201,7 @@ int register_model(struct model *model, int instance)
 		return -EINVAL;
 
 	/* TODO check state/msgs/opcodes */
-	elem->model_l = g_slist_append(elem->model_l, model);
+	elem->serv_model_l = g_slist_append(elem->serv_model_l, model);
 
 	return 0;
 }

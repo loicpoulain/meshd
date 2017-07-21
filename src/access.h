@@ -66,12 +66,12 @@ struct state {
 };
 
 /**
- * struct model - mesh model
+ * struct server_model - mesh server model
  * id:		Mesh Model ID (SIG or Vendor)
  * desc:	human readable model name
- * states:	exposed states in case of server model
+ * states:	exposed states
  */
-struct model {
+struct server_model {
 	uint32_t id;
 	const char *desc;
 	const struct state **states;
@@ -81,18 +81,18 @@ struct model {
  * struct element - element
  * index:	element index (0 is the primary element)
  * subscribe_l:	list of subscribed addr
- * model_l:	exposed states in case of server model
+ * serv_model_l: registered models
  */
 struct element {
 	uint8_t index;
 	GSList *subscribe_l;
-	GSList *model_l;
+	GSList *serv_model_l;
 };
 
 struct element *element_by_index(int index);
 int access_recv_msg(void *data, size_t len, uint16_t src,
 		    uint16_t dst);
 struct element *element_create(int index);
-int register_model(struct model *model, int instance);
+int register_server_model(struct server_model *model, int instance);
 
 #endif

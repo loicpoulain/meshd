@@ -99,5 +99,6 @@ int k2(uint8_t N[16], const uint8_t *P, size_t Plen, uint8_t *NID,
        uint8_t ekey[16], uint8_t pkey[16]);
 int k3(uint8_t N[16], uint8_t dkey[8]);
 int k4(uint8_t N[16], uint8_t *dkey);
+uint8_t fcs(const uint8_t *data, size_t dlen);
 
 #endif

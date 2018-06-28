@@ -86,6 +86,16 @@ struct server_model {
 };
 
 /**
+ * struct client_model - mesh client model
+ * id:          Mesh Model ID (SIG or Vendor)
+ * desc:        human readable model name
+ */
+struct client_model {
+	uint32_t id;
+	const char *desc;
+};
+
+/**
  * struct element - element
  * index:	element index (0 is the primary element)
  * subscribe_l:	list of subscribed addr

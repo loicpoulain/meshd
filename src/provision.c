@@ -245,15 +245,26 @@ struct prov_pkt_failed {
 	struct prov_pkt hdr;
 	uint8_t error_code;
 } __attribute__ ((packed));
-#define PROV_ERROR_PROHIBITED		0x00
-#define PROV_ERROR_INVALID_PDU		0x01
-#define PROV_ERROR_INVALID_FORMAT	0x02
-#define PROV_ERROR_UNEXPECTED_PDU	0x03
-#define PROV_ERROR_CONFIM_FAILED	0x04
-#define PROV_ERROR_OUT_OF_RESOURCES	0x05
-#define PROV_ERROR_DECRYPT_FAILED	0x06
-#define PROV_ERROR_UNEXPECTED_ERR	0x07
-#define PROV_ERROR_ADDR_ASSIGN		0x08
+
+enum prov_error {
+	PROV_ERROR_PROHIBITED,
+	PROV_ERROR_INVALID_PDU,
+	PROV_ERROR_INVALID_FORMAT,
+	PROV_ERROR_UNEXPECTED_PDU,
+	PROV_ERROR_CONFIRM_FAILED,
+	PROV_ERROR_OUT_OF_RESOURCES,
+	PROV_ERROR_DECRYPT_FAILED,
+	PROV_ERROR_UNEXPECTED_ERR,
+	PROV_ERROR_ADDR_ASSIGN,
+	PROV_ERROR_MAX
+};
+
+static const char* prov_error_str[] = {
+	"PROHIBITED", "INVALID_PDU", "INVALID_FORMAT", "UNEXPECTED_PDU",
+	"CONFIRM_FAILED", "OUT_OF_RESOURCES", "DECRYPT_FAILED",
+	"UNEXPECTED_ERR", "ADDR_ASSIGN"
+};
+
 
 #define PKT_PDU_SIZE(pkt_s) (sizeof(pkt_s) - sizeof(struct prov_pkt))
 
@@ -677,7 +688,7 @@ static int recv_random(struct prov_session *session, struct prov_pkt *pkt)
 		return PROV_ERROR_UNEXPECTED_ERR;
 
 	if (memcmp(confval, session->confirm_value_peer, sizeof(confval)))
-		return PROV_ERROR_CONFIM_FAILED;
+		return PROV_ERROR_CONFIRM_FAILED;
 
 	if (session->role == ROLE_DEV) { /* send random now */
 		struct prov_pkt_random random = PROV_PKT(PROV_TYPE_RANDOM);
@@ -876,6 +887,14 @@ static inline void provision_error(struct prov_session *session,
 		session->error = error_code;
 	else
 		session->peer_error = error_code;
+
+	if (error_code < PROV_ERROR_MAX)
+		g_warning("error: %s", prov_error_str[error_code]);
+	else
+		g_warning("unknown error (%u)", error_code);
+
+	if (error_code == PROV_ERROR_UNEXPECTED_PDU) /* non fatal */
+		return;
 
 	prov_switch_state(session, &error_state);
 }

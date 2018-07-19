@@ -25,9 +25,9 @@
 
 #include "advertisers/advertiser.h"
 
-#define AD_TYPE_MESH_MSG	0x42 /* TODO: TBD */
-#define AD_TYPE_MESH_PROV	0x43 /* TODO: TBD */
-#define AD_TYPE_MESH_BEACON	0x44 /* TODO: TBD */
+#define AD_TYPE_MESH_MSG	0x2A
+#define AD_TYPE_MESH_PROV	0x29
+#define AD_TYPE_MESH_BEACON	0x2B
 
 static int idx;
 

@@ -995,6 +995,14 @@ static void provision_timeout(work_t *work)
 	prov_switch_state(session, &error_state);
 }
 
+void provision_link_closed(void *session_id)
+{
+	struct prov_session *session = session_id;
+
+	if (session->state != &complete_state && session->state != &error_state)
+		provision_error(session, PROV_ERROR_UNEXPECTED_ERR, false);
+}
+
 void *provision_accept(struct prov_interface *pif)
 {
 	struct prov_session *session;

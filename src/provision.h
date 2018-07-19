@@ -54,6 +54,7 @@ int provision_recv_pkt(void *session_id, void *pkt, size_t plen);
 void provision_recv_beacon(struct prov_interface *pif, const void *beacon,
 			   size_t size);
 void *provision_accept(struct prov_interface *pif);
+void provision_link_closed(void *session_id);
 
 typedef void (*prov_scan_callack_t)(struct scan_result *res);
 typedef void (*prov_dev_callack_t)(int result);

@@ -324,6 +324,7 @@ static void __prov_link_timeout(work_t *work)
 	link->pif->close(link->pif, link->session_id, REASON_TIMEOUT);
 
 	/* report issue */
+	provision_link_closed(link->session_id);
 }
 
 static void __prov_link_tx(work_t *work)
@@ -439,7 +440,7 @@ static int generic_prov_recv_link_close(struct generic_prov_data *gpd,
 
 	g_message("[link %d] Link closed by peer", link_id);
 
-	/* TODO: report and release */
+	provision_link_closed(link->session_id);
 
 	return 0;
 }

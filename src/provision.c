@@ -98,11 +98,11 @@
  */
 struct prov_pkt {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
+	uint8_t type:6;
 	uint8_t rfu:2;
-	uint8_t type:6;
 #elif __BYTE_ORDER == __BIG_ENDIAN
-	uint8_t type:6;
 	uint8_t rfu:2
+	uint8_t type:6;
 #endif
 	uint8_t params[0];
 } __attribute__ ((packed));

@@ -256,6 +256,7 @@ static void generic_prov_submit(struct prov_link *link,
 	start->gpcf = GPCF_TRANS_START;
 	start->tot_len = cpu_to_be16(trans->dlen);
 	memcpy(start->data, trans->data, frag_len);
+	start->fcs = fcs(trans->data, trans->dlen);
 
 	/* How many continue seg remaining */
 	start->seg_n = (trans->dlen - frag_len + cont_mtu - 1) / cont_mtu;

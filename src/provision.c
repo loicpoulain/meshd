@@ -314,7 +314,7 @@ struct prov_session {
 	uint8_t confirm_value[16];
 	uint8_t confirm_value_peer[16];
 	uint8_t random[16], random_peer[16];
-	uint8_t authvalue[32];
+	uint8_t authvalue[16];
 	uint8_t session_key[16];
 	uint8_t session_nonce16[16];
 	uint8_t invite_pdu[PKT_PDU_SIZE(struct prov_pkt_invite)];
@@ -570,7 +570,7 @@ struct confirm_input {
 static int enter_confirm(struct prov_session *session)
 {
 	struct confirm_input cfin;
-	uint8_t randauth[48];
+	uint8_t randauth[32];
 	int err;
 
 	/* select random */
@@ -672,7 +672,7 @@ static int enter_random(struct prov_session *session)
 static int recv_random(struct prov_session *session, struct prov_pkt *pkt)
 {
 	struct prov_pkt_random *random = (void *)pkt;
-	uint8_t randauth[48];
+	uint8_t randauth[32];
 	uint8_t confval[16];
 	int err;
 
@@ -892,13 +892,13 @@ static inline void provision_error(struct prov_session *session,
 	else
 		session->peer_error = error_code;
 
+	if (error_code == PROV_ERROR_UNEXPECTED_PDU) /* non fatal */
+		return; /* TODO Send eror pkt */
+
 	if (error_code < PROV_ERROR_MAX)
 		g_warning("error: %s", prov_error_str[error_code]);
 	else
 		g_warning("unknown error (%u)", error_code);
-
-	if (error_code == PROV_ERROR_UNEXPECTED_PDU) /* non fatal */
-		return; /* TODO Send eror pkt */
 
 	prov_switch_state(session, &error_state);
 }

@@ -529,7 +529,7 @@ int k2(uint8_t N[16], const uint8_t *P, size_t Plen, uint8_t *NID,
 	/* mod 2 ^ 263, MSB first*/
 	memcpy(pkey, &res[sizeof(res) - 16], 16); /* 128-bit */
 	memcpy(ekey, &res[sizeof(res) - 32], 16); /* 128-bit */
-	*NID = res[sizeof(res) - 1 - 33] & 0x7f; /* 7-bit */
+	*NID = res[sizeof(res) - 33] & 0x7f; /* 7-bit */
 
 	return 0;
 }

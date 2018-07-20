@@ -65,7 +65,7 @@ static void test_k2(void)
 
 
 	g_assert(!k2(N, P, sizeof(P), &NID, ekey, pkey));
-	g_assert(NID = eNID);
+	g_assert(NID == eNID);
 	g_assert(!memcmp(eekey, ekey, sizeof(eekey)));
 	g_assert(!memcmp(epkey, pkey, sizeof(epkey)));
 

@@ -27,6 +27,9 @@
 
 #include "external/bluez/util.h"
 
+typedef uint16_t ___le16;
+typedef uint16_t ___be16;
+
 typedef struct {
 	uint64_t m_low;
 	uint64_t m_high;

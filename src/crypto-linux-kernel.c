@@ -429,6 +429,7 @@ int ecdh_secret(const uint8_t public_key[64], const uint8_t private_key[32],
 	uint8_t private_key2[32];
 	bool res;
 
+	/* MSB to LSB */
 	reverse_array(public_key, public_key2, 32); /* pubk.x */
 	reverse_array(&public_key[32], &public_key2[32], 32); /* pubk.y */
 	reverse_array(private_key, private_key2, 32);
@@ -437,6 +438,7 @@ int ecdh_secret(const uint8_t public_key[64], const uint8_t private_key[32],
 	if (res == false)
 		return -EINVAL;
 
+	/* LSB to MSB */
 	reverse_array(secret, secret, 32);
 
 	return 0;

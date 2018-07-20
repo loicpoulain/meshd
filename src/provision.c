@@ -135,13 +135,13 @@ struct prov_pkt_invite {
 struct prov_pkt_caps {
 	struct prov_pkt hdr;
 	uint8_t num_elem;
-	uint16_t algos;
+	___be16 algos;
 	uint8_t key_type;
 	uint8_t oob_type;
 	uint8_t o_oob_size;
-	uint16_t o_oob_act;
+	___be16 o_oob_act;
 	uint8_t i_oob_size;
-	uint16_t i_oob_act;
+	___be16 i_oob_act;
 } __attribute__ ((packed));
 #define KEY_TYPE_NO_OOB 0x00
 #define KEY_TYPE_OOB 0x01
@@ -232,10 +232,10 @@ struct prov_pkt_data {
 
 struct prov_data {
 	uint8_t net_key[16];
-	uint16_t key_index;
+	___be16 key_index;
 	uint8_t flags;
 	uint32_t iv_index;
-	uint16_t addr;
+	___be16 addr;
 	uint8_t mic[8];
 } __attribute__ ((packed));
 
@@ -460,6 +460,7 @@ static int recv_invite(struct prov_session *session, struct prov_pkt *pkt)
 	/* save capabilities pdu for confirmation-input generation */
 	memcpy(session->caps_pdu, &caps.hdr.params, sizeof(session->caps_pdu));
 
+	caps.algos = cpu_to_be16(ALGO_FIPS_P256);
 	prov_send(session, &caps, sizeof(caps));
 
 	/* wait start */

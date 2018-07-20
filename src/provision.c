@@ -30,17 +30,6 @@
 #include "node.h"
 #include "utils.h"
 
-#define PROV_TYPE_INVITE 0x00
-#define PROV_TYPE_CAPABILITIES 0x01
-#define PROV_TYPE_START	0x02
-#define PROV_TYPE_PUB_KEY 0x03
-#define PROV_TYPE_INPUT_CCOMPLETE 0x04
-#define PROV_TYPE_CONFIRM 0x05
-#define PROV_TYPE_RANDOM 0x06
-#define PROV_TYPE_DATA 0x07
-#define PROV_TYPE_COMPLETE 0x08
-#define PROV_TYPE_FAILED 0x09
-
 #define ALGO_FIPS_P256 0x00000001
 
 #define KEY_TYPE_NO 0x00
@@ -89,6 +78,20 @@
 #define BEACON_UNPROVISIONED_INT 10
 
 #define PROVISION_TO_MS 60000 /* 1min */
+
+enum prov_pkt_type {
+	PROV_TYPE_INVITE,
+	PROV_TYPE_CAPABILITIES,
+	PROV_TYPE_START,
+	PROV_TYPE_PUB_KEY,
+	PROV_TYPE_INPUT_CCOMPLETE,
+	PROV_TYPE_CONFIRM,
+	PROV_TYPE_RANDOM,
+	PROV_TYPE_DATA,
+	PROV_TYPE_COMPLETE,
+	PROV_TYPE_FAILED,
+	PROV_TYPE_MAX
+};
 
 /**
  * struct prov_pkt - Provisioning PDU
@@ -894,7 +897,7 @@ static inline void provision_error(struct prov_session *session,
 		g_warning("unknown error (%u)", error_code);
 
 	if (error_code == PROV_ERROR_UNEXPECTED_PDU) /* non fatal */
-		return;
+		return; /* TODO Send eror pkt */
 
 	prov_switch_state(session, &error_state);
 }
@@ -957,11 +960,17 @@ int provision_recv_pkt(void *session_id, void *data, size_t plen)
 			err = state->handlers[i].handler(session, pkt);
 			if (err)
 				provision_error(session, err, true);
-		} else if (pkt->type == PROV_TYPE_FAILED) {
-			struct prov_pkt_failed *fail = (void *)pkt;
-			provision_error(session, fail->error_code, false);
 		}
 		i++;
+	}
+
+	if (pkt->type == PROV_TYPE_FAILED) {
+		struct prov_pkt_failed *fail = (void *)pkt;
+		provision_error(session, fail->error_code, false);
+	} else if (pkt->type < PROV_TYPE_MAX) { /* Unexpected PDU */
+		provision_error(session, PROV_ERROR_UNEXPECTED_PDU, true);
+	} else { /* Unknown PDU */
+		provision_error(session, PROV_ERROR_INVALID_PDU, true);
 	}
 
 	return 0;

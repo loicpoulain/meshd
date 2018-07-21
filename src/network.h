@@ -101,6 +101,8 @@ struct network {
 	GQueue *cache_q;
 	uint8_t key[16];
 	uint8_t pkey[16];
+	uint8_t ekey[16];
+	uint8_t nid;
 	uint8_t id[8];
 	uint32_t iv_index;
 	uint16_t addr;

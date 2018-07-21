@@ -149,7 +149,7 @@ int network_recv_msg(struct network_intf *nif, struct network_msg *nmsg)
 		struct network_nonce nonce;
 
 		/* msg nid vs network nid (7 lsb) */
-		if (nmsg->nid != (netp->id[7] & 0x7f))
+		if (nmsg->nid != netp->nid)
 			continue;
 
 		/* deobfuscate */
@@ -162,7 +162,7 @@ int network_recv_msg(struct network_intf *nif, struct network_msg *nmsg)
 		nonce.iv_index = cpu_to_be32(netp->iv_index);
 
 		/* Authenticate and in-place decrypt of dst + transport pdu */
-		err = aes_ccm(netp->key, (struct nonce *)&nonce,
+		err = aes_ccm(netp->ekey, (struct nonce *)&nonce,
 			      (uint8_t *)&nmsg->dst, sizeof(nmsg->dst) +
 			      NMSG_PDU_SZ(nmsg) + NMSG_MIC_SZ(nmsg),
 			      (uint8_t *)&nmsg->dst, NMSG_MIC_SZ(nmsg), false);
@@ -216,9 +216,7 @@ int network_send_msg(struct network *net, struct network_msg *nmsg)
 
 	/* least significant bit of the current IV */
 	nmsg->ivi = net->iv_index & 0x01;
-
-	/* 7 least significant bits of the network key identifier */
-	nmsg->nid = net->id[7] & 0x7f;
+	nmsg->nid = net->nid;
 
 	/* Generate network nonce */
 	memset(&nonce, 0, sizeof(nonce));
@@ -227,7 +225,7 @@ int network_send_msg(struct network *net, struct network_msg *nmsg)
 	nonce.iv_index = cpu_to_be32(net->iv_index);
 
 	/* Authenticate and in-place encrypt of dst + transport pdu */
-	err = aes_ccm(net->key, (struct nonce *)&nonce, (uint8_t *)&nmsg->dst,
+	err = aes_ccm(net->ekey, (struct nonce *)&nonce, (uint8_t *)&nmsg->dst,
 		      sizeof(nmsg->dst) + NMSG_PDU_SZ(nmsg) + NMSG_MIC_SZ(nmsg),
 		      (uint8_t *)&nmsg->dst, NMSG_MIC_SZ(nmsg), true);
 	if (err) {
@@ -253,6 +251,7 @@ struct network *network_provision(uint8_t net_key[16], uint16_t key_index,
 	 			  uint32_t iv_index, uint16_t addr)
 {
 	struct network *net;
+	uint8_t zero[1] = { 0x00 };
 
 //	if (network_by_index(key_index))
 //		return NULL;
@@ -263,11 +262,13 @@ struct network *network_provision(uint8_t net_key[16], uint16_t key_index,
 	net->iv_index = iv_index;
 	net->addr = addr;
 
-	/* generate nid */
+	/* generate nid, encryption key and private key */
+	k2(net_key, zero, sizeof(zero), &net->nid, net->ekey, net->pkey);
+	/* generate network id */
 	k3(net_key, net->id);
 
-	g_message("Network provisioned (NID = %02x; addr = %04x)",
-		  net->id[7] & 0x7f, net->addr);
+	g_message("Network provisioned (NID = %02x; addr = %04x)", net->nid,
+		  net->addr);
 
 	node.state = STATE_PROVISIONED;
 

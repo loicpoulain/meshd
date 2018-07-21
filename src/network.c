@@ -186,7 +186,8 @@ int network_recv_msg(struct network_intf *nif, struct network_msg *nmsg)
 
 	/* Forward to low transport layer */
 	/* TODO accept group/broadcast/virutal if subscribed */
-	if (element_by_address(be16_to_cpu(nmsg->dst)))
+	if (net->addr == be16_to_cpu(nmsg->dst) ||
+	    element_by_address(be16_to_cpu(nmsg->dst)))
 		transport_low_recv(net, nmsg);
 
 	/* Relay ? */
@@ -284,6 +285,7 @@ struct network *network_provision_new(void)
 {
 	struct network *net;
 	uint8_t netkey[16];
+	uint16_t addr;
 	int i;
 
 	GRand *rand = g_rand_new();
@@ -293,7 +295,12 @@ struct network *network_provision_new(void)
 		((guint32 *)&netkey)[i] = g_rand_int(rand);
 	}
 
-	net = network_provision(netkey, 0, 0, g_rand_int(rand));
+	/* Generate random address */
+	do { /* TODO: be smarter */
+		addr = g_rand_int(rand);
+	} while (!addr_is_unicast(addr));
+
+	net = network_provision(netkey, 0, 0, addr);
 
 	g_rand_free(rand);
 

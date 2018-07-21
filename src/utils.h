@@ -114,7 +114,7 @@ static inline int ADDR_TYPE(uint16_t addr)
 	if (addr == 0xFFFF)
 		return ADDR_TYPE_BROADCAST;
 
-	switch (addr &= 0xC000) {
+	switch (addr & 0xC000) {
 	case 0xC000:
 		return ADDR_TYPE_GROUP;
 	case 0x8000:

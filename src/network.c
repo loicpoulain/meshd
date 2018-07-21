@@ -112,7 +112,7 @@ static int network_msg_obfuscate(struct network *net, struct network_msg *msg,
 		return err;
 
 	/* obfuscData = (CTL || TTL || SEQ || SRC) ⊕ PECB[0-5] */
-	odata = ((uint8_t *)&msg + 1); /* ctl is the 2nd octet */
+	odata = ((uint8_t *)msg + 1); /* ctl is the 2nd octet */
 	for (i = 0; i <= 5; i++)
 		odata[i] = odata[i] ^ pecb[i];
 

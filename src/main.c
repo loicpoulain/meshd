@@ -71,11 +71,13 @@ gboolean tmp_prov(gpointer d)
 gboolean tmp_sendmsg(gpointer d)
 {
 	char data[] = "hello world this is a long message...";
+	struct network *net = g_list_first(node.network_l)->data;
 
 	if (!net)
 		g_message("No network");
 
-	transport_up_send_access_msg(node.network_l->data,
+	g_message("send msg network %p nid=%x", net, net->nid);
+	transport_up_send_access_msg(net,
 				     data, sizeof(data) - 4, net->addr, 0x1234, 0);
 
 	return true;

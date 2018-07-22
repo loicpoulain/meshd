@@ -284,7 +284,7 @@ struct network *network_provision(uint8_t net_key[16], uint16_t key_index,
 struct network *network_provision_new(void)
 {
 	struct network *net;
-	uint8_t netkey[16];
+	uint8_t netkey[16], index= 0;
 	uint16_t addr;
 	int i;
 
@@ -300,7 +300,8 @@ struct network *network_provision_new(void)
 		addr = g_rand_int(rand);
 	} while (!addr_is_unicast(addr));
 
-	net = network_provision(netkey, 0, 0, addr);
+	while (index < 0xff && network_by_index(index++));
+	net = network_provision(netkey, index - 1, 0, addr);
 
 	g_rand_free(rand);
 

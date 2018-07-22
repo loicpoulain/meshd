@@ -21,6 +21,8 @@
 #include <glib.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <getopt.h>
+#include <unistd.h>
 
 #include "node.h"
 #include "utils.h"
@@ -30,6 +32,8 @@
 #include "transport.h"
 #include "bearer.h"
 #include "access.h"
+
+#include "interfaces/interface.h"
 
 GMainLoop *mainloop;
 struct node_st node;
@@ -83,13 +87,31 @@ gboolean tmp_sendmsg(gpointer d)
 	return true;
 }
 
+static const struct option main_options[] = {
+	{ "help", no_argument, NULL, 'h' },
+	{ "interactive", no_argument, NULL, 'i' },
+	{ }
+};
+
 int main(int argc, char *argv[])
 {
 	guint sid0, sid1, sid2, sid3;
+	bool interactive;
 
 	mainloop = g_main_loop_new(NULL, FALSE);
 	if (mainloop == NULL)
 		return -ENOMEM;
+
+	for (;;) {
+		int opt = getopt_long(argc, argv, "hi", main_options, NULL);
+		if (opt < 0)
+			break;
+			switch (opt) {
+		case 'i':
+			interactive = true;
+			break;
+		}
+	}
 
 	/* Signal handlers */
 	//sid0 = g_unix_signal_add(SIGINT, signal_handler_interrupt, mainloop);
@@ -103,6 +125,10 @@ int main(int argc, char *argv[])
 	provision_init();
 	bearer_adv_init();
 	configuration_server_model_init();
+
+	if (interactive)
+		cmdline_init(STDIN_FILENO, STDOUT_FILENO);
+
 	g_main_loop_run(mainloop);
 
 	crypto_cleanup();

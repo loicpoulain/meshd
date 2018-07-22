@@ -27,6 +27,9 @@ meshd-objs += \
 	src/models/health-server.o \
 	src/models/health-client.o
 
+# interfaces
+meshd-objs += src/interfaces/cmdline.c
+
 bluez-objs = \
 	src/external/bluez/io-glib.o \
 	src/external/bluez/hci.o \

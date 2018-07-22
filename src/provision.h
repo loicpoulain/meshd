@@ -61,6 +61,7 @@ typedef void (*prov_dev_callack_t)(int result);
 
 int provision_init(void);
 int provision_scan(prov_scan_callack_t callback, int duration);
+void provision_scan_stop(void);
 int provision_device(struct prov_interface *pif,
 		     uint8_t device_uuid[16],
 		     int net_index, uint16_t addr,

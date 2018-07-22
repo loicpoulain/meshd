@@ -1044,6 +1044,7 @@ int provision_device(struct prov_interface *pif,
 	struct prov_session *session;
 	struct prov_pkt_invite invite;
 	struct network *net;
+	char uuid[37];
 	int err;
 
 	if (g_slist_find_custom(session_l, device_uuid, match_session_by_uuid))
@@ -1078,7 +1079,9 @@ int provision_device(struct prov_interface *pif,
 	session->pdata.addr = session->address;
 	session->pdata.iv_index = cpu_to_be32(net->iv_index);
 
-	g_message("Starting provisioning");
+	uuid128_to_str(device_uuid, uuid);
+	g_message("Provision %s with nid=0x%02x, addr=0x%04x",
+		  uuid, net->nid, addr);
 
 	err = pif->open(pif, session, device_uuid);
 	if (err) {
@@ -1115,6 +1118,14 @@ static void __scan_timeout(work_t *work)
 	scan_callback = NULL;
 
 	g_message("Scan Terminated");
+}
+
+void provision_scan_stop(void)
+{
+	if (is_scheduled(&scan_to_w)) {
+		cancel_work(&scan_to_w);
+	}
+	__scan_timeout(&scan_to_w);
 }
 
 int provision_scan(prov_scan_callack_t callback, int duration)

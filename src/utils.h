@@ -24,6 +24,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <glib.h>
+#include <stdio.h>
+#include <errno.h>
 
 #include "external/bluez/util.h"
 
@@ -136,5 +138,39 @@ static inline void reverse_array(const uint8_t *array, uint8_t *reversed,
 		reversed[size - 1 - i] = tmp;
 	}
 }
+
+#define ARRAY_SIZE(x)	(sizeof(x) / sizeof((x)[0]))
+
+static inline void uuid128_to_str(uint8_t uuid[16], char str[37])
+{
+	int i;
+
+	/* 8-4-4-4-12 */
+	str[0] = '\0';
+	for (i = 0; i < 16; i++) {
+		sprintf(str, "%s%02x", str, uuid[i]);
+		if (i == 3 || i == 5 || i == 7 || i == 9)
+			strcat(str, "-");
+	}
+	str[36] = '\0';
+}
+
+static inline int str_to_uuid128(char str[37], uint8_t uuid[16])
+{
+	int match;
+
+	match = sscanf(str, "%02hhx%02hhx%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx",
+		       &uuid[0], &uuid[1], &uuid[2], &uuid[3], &uuid[4],
+		       &uuid[5], &uuid[6], &uuid[7], &uuid[8], &uuid[9],
+		       &uuid[10], &uuid[11], &uuid[12], &uuid[13], &uuid[14],
+		       &uuid[15]);
+
+	if (match != 16)
+		return -EINVAL;
+
+	return 0;
+}
+
+#define UUID_STR_NULL "00000000-0000-0000-0000-000000000000"
 
 #endif

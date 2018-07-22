@@ -51,6 +51,7 @@ static void print_network_info(gpointer data, gpointer user_data)
 static int cmd_list_network(int argc, char *argv[])
 {
 	g_slist_foreach(node.network_l, print_network_info, NULL);
+	return 0;
 }
 
 static int cmd_provision_device(int argc, char *argv[])
@@ -67,7 +68,7 @@ static int cmd_provision_device(int argc, char *argv[])
 	if (argc >= 2)
 		sscanf(argv[1], "0x%04x", &addr);
 
-	provision_device(NULL, uuid, 0, addr, NULL);
+	return provision_device(NULL, uuid, 0, addr, NULL);
 }
 
 static int cmd_set_uuid(int argc, char *argv[])
@@ -81,6 +82,8 @@ static int cmd_set_uuid(int argc, char *argv[])
 		return -EINVAL;
 
 	memcpy(node.uuid, uuid, sizeof(uuid));
+
+	return 0;
 }
 
 struct cmd {
@@ -96,12 +99,12 @@ static const struct cmd cmdlist[] = {
 		.function = cmd_scan_unprovisionned,
 	},
 	{
-		.name = "network-create",
+		.name = "net-create",
 		.desc = "Create new network",
 		.function = cmd_create_network,
 	},
 	{
-		.name = "network-list",
+		.name = "net-list",
 		.desc = "List all provisioned networks",
 		.function = cmd_list_network,
 	},
@@ -171,12 +174,11 @@ int cmdline_init(int input, int output)
 {
 	GIOChannel *io = NULL;
 	GError *error = NULL;
-	guint io_watch_id = 0;
 
 	out = output;
 	io = g_io_channel_unix_new(input);
 	g_io_channel_set_flags(io, G_IO_FLAG_NONBLOCK, &error);
-	io_watch_id = g_io_add_watch(io, G_IO_IN, io_callback, NULL);
+	g_io_add_watch(io, G_IO_IN, io_callback, NULL);
 	g_io_channel_unref(io);
 
 	return 0;

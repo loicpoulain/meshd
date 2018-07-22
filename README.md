@@ -13,19 +13,22 @@ CRYPTO_USER_API_AEAD, CRYPTO_CCM
 build meshd:
 - make
 
-
-Only User control via SIGUSR1/2:
+Basic interactive interface for now
 
 1. run meshd on device 1
-- sudo ./meshd
+sudo ./meshd -i
 
 2. run meshd on device 2
-- sudo ./meshd
+sudo ./meshd -i
 
-3. Self provisioning & provisioning of device 2
-- sudo killall -SIGUSR1 meshd
+3. Create network on device 1
+net-create
 
-4. Wait for provisioning complete
+4. Scan unprovisioned nodes on device 1
+scan on
 
-5. Send a mesh message from device 2 to 1
-- sudo killall -SIGUSR2 meshd
+5. Provision discovered node with address 0x1245
+scan off
+provision 00000000-0000-0000-0000-000000000000 0x1245
+
+6. Wait for provisioning complete

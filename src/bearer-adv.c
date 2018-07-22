@@ -114,8 +114,6 @@ static void bearer_adv_recv_prov(struct bearer_adv_data *badv,
 static void bearer_adv_recv_beacon(struct bearer_adv_data *badv,
 				   const struct ad_struct *ad)
 {
-	g_message("Recv Beacon");
-
 	generic_prov_recv_beacon(&badv->gpb, ad->data,
 				 ad->len - sizeof(ad->type));
 }

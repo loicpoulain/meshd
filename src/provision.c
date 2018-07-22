@@ -457,10 +457,11 @@ static int recv_invite(struct prov_session *session, struct prov_pkt *pkt)
 	memcpy(session->invite_pdu, &invite->hdr.params,
 	       sizeof(session->invite_pdu));
 
+	caps.algos = cpu_to_be16(ALGO_FIPS_P256);
+
 	/* save capabilities pdu for confirmation-input generation */
 	memcpy(session->caps_pdu, &caps.hdr.params, sizeof(session->caps_pdu));
 
-	caps.algos = cpu_to_be16(ALGO_FIPS_P256);
 	prov_send(session, &caps, sizeof(caps));
 
 	/* wait start */

@@ -68,7 +68,7 @@ static void le_meta_evt_recv_cb(const void *data, uint8_t size, void *user_data)
 		return;
 
 	if (report->num_reports != 1) {
-		g_error("FIXME: do not manage multi-report");
+		g_warning("FIXME: do not manage multi-report");
 		return;
 	}
 

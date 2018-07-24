@@ -767,7 +767,7 @@ static int enter_data(struct prov_session *session)
 	pdata->key_index = cpu_to_be16(session->net_index);
 	pdata->flags = 0x00; /* TODO */
 	pdata->iv_index = cpu_to_be32(net->iv_index);
-	pdata->addr = cpu_to_be16(0x1234);
+	pdata->addr = cpu_to_be16(session->address);
 
 	/* EncryptProvData, MIC = AES-CCM(SessionKey, SessionNonce, ProvData) */
 	err = aes_ccm(session->session_key, (void*)session->session_nonce16 + 3,

@@ -108,6 +108,7 @@ struct element {
 };
 
 struct element *element_by_index(int index);
+struct element *element_by_address(uint16_t addr);
 int access_recv_msg(void *data, size_t len, uint16_t src,
 		    uint16_t dst);
 struct element *element_create(int index);

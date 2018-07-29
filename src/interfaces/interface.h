@@ -45,6 +45,7 @@ static inline int register_user_intf(struct user_interface *intf)
 {
 	node.interface_l = g_slist_append(node.interface_l, intf);
 	g_message("User interface %s registered", intf->name);
+	return 0;
 }
 
 #endif

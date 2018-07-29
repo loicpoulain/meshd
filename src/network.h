@@ -133,7 +133,7 @@ static inline void network_msg_unref(struct network_msg *nmsg)
 		g_free(nmsg);
 }
 
-static inline struct network_msg *network_msg_clone(struct network_msg *msg)
+static inline struct network_msg *network_msg_clone(const struct network_msg *msg)
 {
 	struct network_msg *msg_clone = network_msg_alloc(msg->len);
 

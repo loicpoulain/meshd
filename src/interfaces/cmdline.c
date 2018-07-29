@@ -63,7 +63,7 @@ static int cmd_list_network(int argc, char *argv[])
 static int cmd_provision_device(int argc, char *argv[])
 {
 	uint8_t uuid[16] = {};
-	uint16_t addr = 0x0000;
+	unsigned int addr = 0x0000;
 	struct network *net;
 
 	if (argc < 1)
@@ -84,7 +84,7 @@ static int cmd_provision_device(int argc, char *argv[])
 	if (argc >= 3)
 		sscanf(argv[2], "0x%04x", &addr);
 
-	return provision_device(net ? net->index : NULL, uuid, 0, addr, NULL);
+	return provision_device(NULL, uuid, net ? net->index : 0, addr, NULL);
 }
 
 static int cmd_set_uuid(int argc, char *argv[])
@@ -106,7 +106,7 @@ static int cmd_get_uuid(int argc, char *argv[])
 {
 	char uuid[37];
 
-	uuid128_to_str(&node.uuid, &uuid);
+	uuid128_to_str(node.uuid, uuid);
 
 	dprintf(out, "%s\n", uuid);
 
@@ -152,7 +152,7 @@ static int cmd_sendnet(int argc, char *argv[])
 	nmsg->ctl = 0x00;
 	nmsg->len += 4; /* non ctrl msg mic */
 
-	while (sscanf(argv[2], "%02x%s", &nmsg->pdu_mic[i++], argv[2]) == 2);
+	while (sscanf(argv[2], "%hhx %s", &nmsg->pdu_mic[i++], argv[2]) == 2);
 	nmsg->len += i;
 
 	ret = network_send_msg(net, nmsg);

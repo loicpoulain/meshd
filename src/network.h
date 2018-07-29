@@ -156,6 +156,20 @@ static inline struct network *network_by_index(int index)
 	return NULL;
 }
 
+static inline struct network *network_by_nid(uint8_t nid)
+{
+	GSList *l;
+
+	for (l = node.network_l; l != NULL; l = l->next) {
+		struct network *net = l->data;
+
+		if (net->nid == nid)
+			return net;
+	}
+
+	return NULL;
+}
+
 int network_init(void);
 void network_cleanup(void);
 int network_intf_register(struct network_intf *nif);

@@ -28,6 +28,7 @@
 struct node_st {
 	GSList *network_l;
 	GSList *element_l;
+	GSList *interface_l;
 	enum {  STATE_UNPROVISIONED,
 		STATE_PROVISIONING,
 		STATE_PROVISIONED } state;

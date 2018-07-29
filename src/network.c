@@ -28,6 +28,8 @@
 #include "access.h"
 #include "access.h"
 
+#include "interfaces/interface.h"
+
 #define MAX_CACHE_ENTRY 100
 
 /* Network Interface list */
@@ -133,7 +135,7 @@ int network_intf_register(struct network_intf *nif)
 
 void network_intf_unregister(struct network_intf *nif)
 {
-	g_message("Network interface %s registered", nif->name);
+	g_message("Network interface %s unregistered", nif->name);
 
 	intf_list = g_slist_remove(intf_list, nif);
 }
@@ -183,6 +185,8 @@ int network_recv_msg(struct network_intf *nif, struct network_msg *nmsg)
 	err = network_cache_add(net, nmsg);
 	if (err)
 		return err;
+
+	user_intf_network_recv(net, nmsg);
 
 	/* Forward to low transport layer */
 	/* TODO accept group/broadcast/virutal if subscribed */
@@ -277,6 +281,8 @@ struct network *network_provision(uint8_t net_key[16], uint16_t key_index,
 	net->relay_q = g_queue_new();
 
 	node.network_l = g_slist_append(node.network_l, net);
+
+	user_intf_network_added(net);
 
 	return net;
 }

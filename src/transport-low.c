@@ -503,6 +503,9 @@ int transport_low_recv(struct network *net, struct network_msg *nmsg)
 	if (!net->trans_priv)
 		net->trans_priv = transport_low_create();
 
+	if (!tpdulen)
+		return -EINVAL;
+
 	/* TODO avoid this double link */
 	tl = net->trans_priv;
 	tl->net = net;

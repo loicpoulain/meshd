@@ -11,6 +11,8 @@
 
 static int out;
 
+/* DIRTY CMDLINE INTERFACE */
+
 struct cmd {
 	const char *name;
 	const char *desc;
@@ -22,7 +24,7 @@ void cmd_scan_callback(struct scan_result *res)
 	char str[37];
 
 	uuid128_to_str(res->device_uuid, str);
-	dprintf(out, "%s\n", str);
+	dprintf(out, "\r[unprov] %s\n> ", str);
 }
 
 static int cmd_scan_unprovisionned(int argc, char *argv[])
@@ -50,8 +52,8 @@ static void print_network_info(gpointer data, gpointer user_data)
 {
 	struct network *net = data;
 
-	dprintf(out, "[%u][nid=0x%02x][addr=0x%04x]\n", net->index, net->nid,
-		net->addr);
+	dprintf(out, "\r[net][index=%u][nid=0x%02x][addr=0x%04x]\n> ",
+		net->index, net->nid, net->addr);
 }
 
 static int cmd_list_network(int argc, char *argv[])
@@ -108,7 +110,7 @@ static int cmd_get_uuid(int argc, char *argv[])
 
 	uuid128_to_str(node.uuid, uuid);
 
-	dprintf(out, "%s\n", uuid);
+	dprintf(out, "\r%s\n> ", uuid);
 
 	return 0;
 }
@@ -210,7 +212,8 @@ static int cmd_help(int argc, char *argv[])
 	int i = 0;
 
 	for (i = 0; i < ARRAY_SIZE(cmdlist); i++) {
-		dprintf(out, "- %s %s\n", cmdlist[i].name, cmdlist[i].desc);
+		dprintf(out, "\r[help] %s %s\n> ", cmdlist[i].name,
+			cmdlist[i].desc);
 	}
 
 	return 0;
@@ -236,14 +239,15 @@ static void execute(char *cmd)
 
 			ret = cmdlist[i].function(argc - 2, &argv[1]);
 			if (!ret)
-				dprintf(out, "OK\n");
+				dprintf(out, "\rOK\n> ");
 			else
-				dprintf(out, "ERROR (%s)\n", strerror(-ret));
+				dprintf(out, "\rERROR (%s)\n> ",
+					strerror(-ret));
 			return;
 		}
 	}
 
-	dprintf(out, "UNKNOWN\n");
+	dprintf(out, "\rUNKNOWN\n> ");
 }
 
 static gboolean io_callback (GIOChannel *io, GIOCondition cond, gpointer data)
@@ -255,6 +259,8 @@ static gboolean io_callback (GIOChannel *io, GIOCondition cond, gpointer data)
 	       == G_IO_STATUS_NORMAL) {
 		execute(str->str);
 	}
+
+	dprintf(out, "\r> ");
 
 	g_string_free(str, TRUE);
 
@@ -279,14 +285,15 @@ static void cmdline_network_recv(struct network *net, struct network_msg *nmsg)
 	}
 
 	dprintf(out,
-		"[net-recv][nid=0x%02x][src=0x%04x][dst=0x%04x][data=%s]\n",
+		"\r[net-recv][nid=0x%02x][src=0x%04x][dst=0x%04x][data=%s]\n> ",
 		net->nid, src, dst, data);
 
 }
 
 static void cmdline_network_add(struct network *net)
 {
-	dprintf(out, "[net-add][nid=0x%02x][index=%d]\n", net->nid, net->index);
+	dprintf(out, "\r[net-add][index=%u][nid=0x%02x]\n> ", net->index,
+		net->nid);
 }
 
 struct user_interface cmdline_intf = {

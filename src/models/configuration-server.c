@@ -56,7 +56,7 @@ static const struct state default_ttl_state = {
 
 static struct server_model configuration_server_model = {
 	.id = 0x0000,
-	.desc = "Configuation server",
+	.desc = "Configuration server",
 	.states = (const struct state*[]) { &secure_network_beacon_state,
 					    &default_ttl_state, NULL },
 };

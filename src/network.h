@@ -133,7 +133,7 @@ static inline void network_msg_unref(struct network_msg *nmsg)
 		g_free(nmsg);
 }
 
-static inline struct network_msg *network_msg_clone(struct network_msg *msg)
+static inline struct network_msg *network_msg_clone(const struct network_msg *msg)
 {
 	struct network_msg *msg_clone = network_msg_alloc(msg->len);
 
@@ -150,6 +150,20 @@ static inline struct network *network_by_index(int index)
 		struct network *net = l->data;
 
 		if (net->index == index)
+			return net;
+	}
+
+	return NULL;
+}
+
+static inline struct network *network_by_nid(uint8_t nid)
+{
+	GSList *l;
+
+	for (l = node.network_l; l != NULL; l = l->next) {
+		struct network *net = l->data;
+
+		if (net->nid == nid)
 			return net;
 	}
 

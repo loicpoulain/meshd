@@ -216,7 +216,7 @@ int network_send_msg(struct network *net, struct network_msg *nmsg)
 {
 	struct network_nonce nonce;
 	GSList *intfl;
-    	int err,err1;
+    	int err;
 
 	/* least significant bit of the current IV */
 	nmsg->ivi = net->iv_index & 0x01;
@@ -227,7 +227,7 @@ int network_send_msg(struct network *net, struct network_msg *nmsg)
 	nonce.type = NONCE_NETWORK;
 	memcpy(&nonce.ctl_ttl, (void *)nmsg + 1, 6);
 	nonce.iv_index = cpu_to_be32(net->iv_index);
-	err1 = network_cache_add(net, nmsg);
+	network_cache_add(net, nmsg);
 
 	/* Authenticate and in-place encrypt of dst + transport pdu */
 	err = aes_ccm(net->ekey, (struct nonce *)&nonce, (uint8_t *)&nmsg->dst,

@@ -4,13 +4,13 @@ jobs:
   include:
   - name: "Make GCC"
     compiler: gcc
-    script: make --verbose
+    script: make --debug
   - name: "Make Clang"
     compiler: clang
-    script: make test --verbose
+    script: make test --debug
   - name: "Make test GCC"
     compiler: gcc
-    script: make --verbose
+    script: make --debug
   - name: "Make test Clang"
     compiler: clang
-    script: make test --verbose
+    script: make test --debug

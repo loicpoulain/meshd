@@ -1,12 +1,16 @@
 language: c
 
-compiler:
-  - clang
-  - gcc
-
-env:
- - SCRIPT: 'make'
- - SCRIPT: 'make test'
- 
-script: "($SCRIPT)"
- 
+job: 
+  include:
+  - name: "Make GCC"
+    compiler: gcc
+    script: make --verbose
+  - name: "Make Clang"
+    compiler: clang
+    script: make test --verbose
+  - name: "Make test GCC"
+    compiler: gcc
+    script: make --verbose
+  - name: "Make test Clang"
+    compiler: clang
+    script: make test --verbose

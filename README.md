@@ -1,4 +1,4 @@
-# meshd
+# meshd [![Travis Build Status](https://travis-ci.org/loicpoulain/meshd.svg?branch=master)](https://travis-ci.org/loicpoulain/meshd)
 Bluetooth mesh stack POC for Linux
 In development...
 

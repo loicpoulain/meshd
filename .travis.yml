@@ -5,8 +5,8 @@ compiler:
   - gcc
 
 env:
- - SCRIPT: make
- - SCRIPT: make test
+ - SCRIPT: 'make
+ - SCRIPT: 'make test'
  
- script: $SCRIPT
+script: "($SCRIPT)"
  

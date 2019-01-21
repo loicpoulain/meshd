@@ -1,6 +1,6 @@
 language: c
 
-job: 
+jobs: 
   include:
   - name: "Make GCC"
     compiler: gcc
